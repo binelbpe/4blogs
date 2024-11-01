@@ -221,7 +221,7 @@ exports.updateProfile = async (req, res) => {
       console.log('Processing password update');
       const isMatch = await user.comparePassword(req.body.currentPassword);
       if (!isMatch) {
-        console.log('Current password is incorrect');
+      
         return res.status(400).json('Current password is incorrect')
       }
       user.password = req.body.newPassword;

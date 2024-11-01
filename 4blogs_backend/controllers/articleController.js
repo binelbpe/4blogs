@@ -126,7 +126,7 @@ exports.updateArticle = async (req, res) => {
     });
 
     await article.save();
-    console.log('Article updated:', article); 
+  
     res.json(article);
   } catch (error) {
     console.error('Error updating article:', error);
