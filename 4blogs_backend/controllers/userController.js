@@ -24,11 +24,9 @@ exports.register = async (req, res) => {
       if (req.file) {
         deleteFile(req.file.path);
       }
-      return sendResponse(res, 400, null, 
-        userExists.email === email 
-          ? 'Email already registered' 
-          : 'Phone number already registered'
-      );
+      return res.status(400).json({message: userExists.email === email 
+        ? 'Email already registered' 
+        : 'Phone number already registered'})
     }
 
  
@@ -44,7 +42,7 @@ exports.register = async (req, res) => {
         if (req.file) {
           deleteFile(req.file.path);
         }
-        return sendResponse(res, 400, null, 'Invalid preferences format');
+        return res.status(400).json({message: 'Invalid preferences format'||error.message})
       }
     }
 
@@ -68,18 +66,14 @@ exports.register = async (req, res) => {
 
     const user = await User.create(userData);
     const token = generateToken(user._id);
-
-    sendResponse(res, 201, {
-      token,
-      user: user.toPublicJSON()
-    }, 'Registration successful');
+return res.status(201).json({token,user: user.toPublicJSON(),message:'Registration successful'})
 
   } catch (error) {
     console.error('Registration error:', error);
     if (req.file) {
       deleteFile(req.file.path);
     }
-    sendResponse(res, 400, null, error.message || 'Registration failed');
+    return res.status(400).jaso({message:error.message|| 'Registration failed' })
   }
 };
 
@@ -113,14 +107,43 @@ exports.login = async (req, res) => {
       preferences: user.preferences,
       createdAt: user.createdAt
     };
-
-    sendResponse(res, 200, {
-      token,
-      user: userData
-    }, 'Login successful');
+return res.status(200).json({token,user: userData, message:'Login successful'})
   } catch (error) {
     console.error('Login error:', error);
-    sendResponse(res, 400, null, error.message || 'Login failed');
+  return res.status(400).json({message:error.message||'Login failed'})
   }
 };
+
+exports.getUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .select('-password')
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(400).json({ message: error.message });
+  }
+};
+
+exports.getUserArticles = async (req, res) => {
+  try {
+    const articles = await Article.find({ 
+      author: req.params.id,
+      deleted: false 
+    })
+    .sort({ createdAt: -1 })
+    .populate('author', 'firstName lastName');
+
+    res.json(articles);
+  } catch (error) {
+    console.error('Error fetching user articles:', error);
+    res.status(400).json({ message: error.message });
+  }
+}; 
 
