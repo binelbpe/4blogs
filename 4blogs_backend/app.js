@@ -4,10 +4,12 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const path = require('path');
 const fs = require('fs');
+const articleRoutes = require('./routes/articleRoutes');
 const userRoutes = require('./routes/userRoutes');
-const errorMiddleware = require('./middleware/errorMiddleware');
+const errorHandler = require('./middleware/errorMiddleware');
 
 const app = express();
+
 
 app.use(cors({
   origin: process.env.FRONTEND_URL,
@@ -23,12 +25,10 @@ if (!fs.existsSync(uploadsDir)){
 }
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-
+app.use('/user/articles', articleRoutes);
 app.use('/user', userRoutes);
 
-
-app.use(errorMiddleware);
+app.use(errorHandler);
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
@@ -37,10 +37,10 @@ mongoose.connect(process.env.MONGODB_URI)
   })
   .catch((err) => {
     console.error('MongoDB connection error:', err);
-    process.exit(1); 
+    process.exit(1);
   });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 }); 

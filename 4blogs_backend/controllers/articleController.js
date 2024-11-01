@@ -1,4 +1,4 @@
-const Article = require('../models/article.model');
+const Article = require('../models/articleModel');
 const fs = require('fs');
 const path = require('path');
 
