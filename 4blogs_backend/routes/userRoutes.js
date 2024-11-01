@@ -8,7 +8,7 @@ router.post('/register', upload.single('image'), userController.register);
 router.post('/login', userController.login);
 
 router.get('/profile', auth, userController.getProfile);
-router.put('/profile', auth, upload.single('image'), userController.updateProfile);
+router.put('/update_profile', auth, upload.single('image'), userController.updateProfile);
 router.get('/:id',auth, userController.getUserProfile);
 router.get('/:id/articles',auth, userController.getUserArticles);
 

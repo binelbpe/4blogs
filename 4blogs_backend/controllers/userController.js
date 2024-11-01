@@ -1,5 +1,7 @@
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const path = require('path');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -7,7 +9,13 @@ const generateToken = (id) => {
   });
 };
 
-
+const deleteFile = (filePath) => {
+  if (!filePath) return;
+  const fullPath = path.join(__dirname, '..', filePath.replace(/^\//, ''));
+  if (fs.existsSync(fullPath)) {
+    fs.unlinkSync(fullPath);
+  }
+};
 
 exports.register = async (req, res) => {
   try {
@@ -15,6 +23,7 @@ exports.register = async (req, res) => {
       body: req.body,
       file: req.file ? 'File present' : 'No file'
     });
+ 
 
     const { email, phone } = req.body;
   
