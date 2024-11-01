@@ -7,9 +7,9 @@ const upload = require('../middleware/uploadMiddleware');
 router.post('/register', upload.single('image'), userController.register);
 router.post('/login', userController.login);
 
-router.get('/profile', auth, authController.getProfile);
-router.put('/profile', auth, upload.single('image'), authController.updateProfile);
-router.get('/:id', userController.getUserProfile);
-router.get('/:id/articles', userController.getUserArticles);
+router.get('/profile', auth, userController.getProfile);
+router.put('/profile', auth, upload.single('image'), userController.updateProfile);
+router.get('/:id',auth, userController.getUserProfile);
+router.get('/:id/articles',auth, userController.getUserArticles);
 
 module.exports = router; 
