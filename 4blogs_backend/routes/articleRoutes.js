@@ -10,6 +10,7 @@ router.post('/', upload.single('image'), articleController.createArticle);
 router.get('/', articleController.getArticles);
 router.get('/user', articleController.getUserArticles);
 router.get('/:id', articleController.getArticleById);
+router.get('/user/:id', articleController.getArticleByUserAndId);
 router.put('/:id', upload.single('image'), articleController.updateArticle);
 router.delete('/:id', articleController.deleteArticle);
 router.post('/:id/block', articleController.blockArticle);

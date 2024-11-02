@@ -69,6 +69,22 @@ exports.getUserArticles = async (req, res) => {
   }
 };
 
+exports.getArticleByUserAndId = async (req, res) => {
+  try {
+    const article = await Article.findOne({
+      _id: req.params.id,
+      deleted: false
+    }).populate('author', 'firstName lastName');
+    
+    if (!article) {
+      return res.status(404).json({ message: 'Article not found' });
+    } 
+    res.json(article);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 exports.getArticleById = async (req, res) => {
   try {
     const article = await Article.findOne({
@@ -100,38 +116,41 @@ exports.updateArticle = async (req, res) => {
       return res.status(404).json({ message: 'Article not found' });
     }
 
+    // Handle image updates
     if (req.body.removeImage === 'true') {
       if (article.image) {
-        deleteFile(article.image);
+        await deleteFile(article.image);
         article.image = null;
       }
     } else if (req.file) {
       if (article.image) {
-        deleteFile(article.image);
+        await deleteFile(article.image);
       }
       article.image = `/uploads/${req.file.filename}`;
     }
 
-    const updates = { ...req.body };
-    delete updates.removeImage; 
+    // Update basic fields
+    if (req.body.title) article.title = req.body.title;
+    if (req.body.description) article.description = req.body.description;
+    if (req.body.category) article.category = req.body.category;
 
-    Object.keys(updates).forEach(key => {
-      if (key !== 'image') { 
-        if (key === 'tags' && typeof updates[key] === 'string') {
-          article[key] = JSON.parse(updates[key]);
-        } else {
-          article[key] = updates[key];
-        }
+    // Handle tags
+    if (req.body.tags) {
+      try {
+        article.tags = JSON.parse(req.body.tags);
+      } catch (error) {
+        console.error('Error parsing tags:', error);
+        article.tags = [];
       }
-    });
+    }
 
     await article.save();
-  
     res.json(article);
   } catch (error) {
     console.error('Error updating article:', error);
+    // Clean up uploaded file if there was an error
     if (req.file) {
-      deleteFile(`/uploads/${req.file.filename}`);
+      await deleteFile(`/uploads/${req.file.filename}`);
     }
     res.status(400).json({ message: error.message });
   }
@@ -165,9 +184,9 @@ exports.blockArticle = async (req, res) => {
       return res.status(404).json({ message: 'Article not found' });
     }
     
-    if (article.author.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: 'Only the author can block their own article' });
-    }
+    // if (article.author.toString() !== req.user._id.toString()) {
+    //   return res.status(403).json({ message: 'Only the author can block their own article' });
+    // }
 
     const blockIndex = article.blocks.indexOf(req.user._id);
     if (blockIndex > -1) {

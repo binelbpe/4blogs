@@ -233,7 +233,7 @@ exports.updateProfile = async (req, res) => {
     
     const updatedUser = user.toPublicJSON();
     console.log('User updated successfully:', updatedUser);
-    return res.status(200).json({user: updatedUser,message:'Profile updated successfully'})
+    return res.status(200).json({success:true,data:{user: updatedUser},message:'Profile updated successfully'})
 
   } catch (error) {
     console.error('=== Update Profile Error ===');
