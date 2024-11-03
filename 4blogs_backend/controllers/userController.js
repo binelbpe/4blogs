@@ -81,7 +81,7 @@ return res.status(201).json({success:true,data:{token,user: user.toPublicJSON()}
     if (req.file) {
       deleteFile(req.file.path);
     }
-    return res.status(400).jaso('Registration failed' )
+    return res.status(400).jason({message:'Registration failed' })
   }
 };
 
@@ -119,7 +119,7 @@ exports.login = async (req, res) => {
 return res.status(200).json({success:true,data:{token,user: userData}, message:'Login successful'})
   } catch (error) {
     console.error('Login error:', error);
-  return res.status(400).json(error.message||'Login failed')
+  return res.status(400).json({message:error.message||'Login failed'})
   }
 };
 
@@ -130,13 +130,13 @@ exports.getUserProfile = async (req, res) => {
       .lean();
 
     if (!user) {
-      return res.status(404).json( 'User not found' );
+      return res.status(404).json({message: 'User not found'} );
     }
 
     res.json(user);
   } catch (error) {
     console.error('Error fetching user profile:', error);
-    res.status(400).json(error.message||'Error fetching user profile' );
+    res.status(400).json({message:error.message||'Error fetching user profile'} );
   }
 };
 
@@ -152,7 +152,7 @@ exports.getUserArticles = async (req, res) => {
     res.json(articles);
   } catch (error) {
     console.error('Error fetching user articles:', error);
-    res.status(400).json(error.message||'Error fetching user articles');
+    res.status(400).json({message:error.message||'Error fetching user articles'});
   }
 }; 
 
@@ -165,7 +165,7 @@ exports.getProfile = async (req, res) => {
     }
     return res.status(200).json(user.toPublicJSON())
   } catch (error) {
-    return res.status(400).json(error.message)
+    return res.status(400).json({message:error.message})
   }
 };
 
@@ -184,7 +184,7 @@ exports.updateProfile = async (req, res) => {
         console.log('Deleting uploaded file due to user not found');
         deleteFile(req.file.path);
       }
-      return res.status(404).json('User not found')
+      return res.status(404).json({message:'User not found'})
     }
 
     console.log('Found user:', user);
@@ -222,7 +222,7 @@ exports.updateProfile = async (req, res) => {
       const isMatch = await user.comparePassword(req.body.currentPassword);
       if (!isMatch) {
       
-        return res.status(400).json('Current password is incorrect')
+        return res.status(400).json({message:'Current password is incorrect'})
       }
       user.password = req.body.newPassword;
       console.log('Password updated successfully');
@@ -247,8 +247,8 @@ exports.updateProfile = async (req, res) => {
     
     if (error.name === 'ValidationError') {
       console.error('Validation error details:', error.errors);
-      return res.status(400).json('Validation failed: ' + Object.values(error.errors).map(e => e.message).join(', '))
+      return res.status(400).json({message:'Validation failed: ' + Object.values(error.errors).map(e => e.message).join(', ')})
     }
-    return res.status(400).json(error.message || 'Failed to update profile')
+    return res.status(400).json({message:error.message || 'Failed to update profile'})
   }
 }; 
