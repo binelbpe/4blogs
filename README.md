@@ -27,7 +27,7 @@ A modern article feeds web application built with the MERN stack that allows use
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/4blogs.git
+git clone https://github.com/binelbpe/4blogs.git
 cd 4blogs
 ```
 
