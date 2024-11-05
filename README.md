@@ -78,7 +78,6 @@ The application will be available at:
 - Redux Toolkit for state management
 - Tailwind CSS for styling
 - Material-UI components
-- Formik & Yup for form handling
 - Axios for API requests
 
 ### Backend
