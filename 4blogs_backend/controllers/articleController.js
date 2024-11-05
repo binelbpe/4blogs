@@ -116,7 +116,7 @@ exports.updateArticle = async (req, res) => {
       return res.status(404).json({ message: 'Article not found' });
     }
 
-    // Handle image updates
+  
     if (req.body.removeImage === 'true') {
       if (article.image) {
         await deleteFile(article.image);
@@ -129,12 +129,11 @@ exports.updateArticle = async (req, res) => {
       article.image = `/uploads/${req.file.filename}`;
     }
 
-    // Update basic fields
+
     if (req.body.title) article.title = req.body.title;
     if (req.body.description) article.description = req.body.description;
     if (req.body.category) article.category = req.body.category;
-
-    // Handle tags
+ 
     if (req.body.tags) {
       try {
         article.tags = JSON.parse(req.body.tags);
@@ -148,7 +147,6 @@ exports.updateArticle = async (req, res) => {
     res.json(article);
   } catch (error) {
     console.error('Error updating article:', error);
-    // Clean up uploaded file if there was an error
     if (req.file) {
       await deleteFile(`/uploads/${req.file.filename}`);
     }
@@ -183,10 +181,7 @@ exports.blockArticle = async (req, res) => {
     if (!article) {
       return res.status(404).json({ message: 'Article not found' });
     }
-    
-    // if (article.author.toString() !== req.user._id.toString()) {
-    //   return res.status(403).json({ message: 'Only the author can block their own article' });
-    // }
+  
 
     const blockIndex = article.blocks.indexOf(req.user._id);
     if (blockIndex > -1) {
@@ -197,6 +192,71 @@ exports.blockArticle = async (req, res) => {
 
     await article.save();
     res.json(article);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+exports.likeArticle = async (req, res) => {
+  try {
+    const article = await Article.findById(req.params.id);
+    
+    if (!article) {
+      return res.status(404).json({ message: 'Article not found' });
+    }
+
+    const dislikeIndex = article.dislikes.indexOf(req.user._id);
+    if (dislikeIndex > -1) {
+      article.dislikes.splice(dislikeIndex, 1);
+    }
+
+ 
+    const likeIndex = article.likes.indexOf(req.user._id);
+    if (likeIndex > -1) {
+      article.likes.splice(likeIndex, 1); 
+    } else {
+      article.likes.push(req.user._id); 
+    }
+
+    await article.save();
+    res.json({
+      likes: article.likes.length,
+      dislikes: article.dislikes.length,
+      isLiked: article.likes.includes(req.user._id),
+      isDisliked: article.dislikes.includes(req.user._id)
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+exports.dislikeArticle = async (req, res) => {
+  try {
+    const article = await Article.findById(req.params.id);
+    
+    if (!article) {
+      return res.status(404).json({ message: 'Article not found' });
+    }
+
+    const likeIndex = article.likes.indexOf(req.user._id);
+    if (likeIndex > -1) {
+      article.likes.splice(likeIndex, 1);
+    }
+
+    const dislikeIndex = article.dislikes.indexOf(req.user._id);
+    if (dislikeIndex > -1) {
+      article.dislikes.splice(dislikeIndex, 1); 
+    } else {
+      article.dislikes.push(req.user._id); 
+    }
+
+    await article.save();
+    res.json({
+      likes: article.likes.length,
+      dislikes: article.dislikes.length,
+      isLiked: article.likes.includes(req.user._id),
+      isDisliked: article.dislikes.includes(req.user._id)
+    });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
